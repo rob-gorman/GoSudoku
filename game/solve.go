@@ -8,6 +8,7 @@ func Solve(board [81]int) (solution [81]int, solved bool) {
 }
 
 func populateBoard(board [81]int) ([81]int, bool) {
-	newBoard := [81]int{}
+	nextSquare := nextSpaceIndex(board)
+	moves := ValidNumbers(board, nextSquare)
 	return newBoard, false
 }
