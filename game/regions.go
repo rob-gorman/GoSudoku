@@ -1,7 +1,9 @@
 package game
 
-type regionType [9]map[int]int // { index: value }
+type region map[int]int // singular row/col/box { index: value }
+type regionType [9]region
 type regionFunc func(int) int
+type indexRegions [81][3]region // {index: {regions including that index}}
 
 var emptyBoard [81]int
 var boardSize int = len(emptyBoard)
@@ -14,20 +16,6 @@ var Boxes regionType = buildFullRegion(emptyBoard, boxAlg)
 var regionsAlgs = [3]regionFunc{rowAlg, colAlg, boxAlg}
 var regions = [3]regionType{Rows, Cols, Boxes}
 
-func ValidNumbers(board [81]int, index int) (result []int) {
-	targetRegions := regionsIncludingIndex(index)
-	fillIndexRegions(board, targetRegions)
-	filledValues := valuesInRegions(targetRegions)
-
-	for i := 1; i <= 9; i++ {
-		if !filledValues[i] {
-			result = append(result, i)
-		}
-	}
-
-	return result
-}
-
 func regionsIncludingIndex(index int) [3]map[int]int {
 	var result [3]map[int]int
 	for i := 0; i < len(regions); i++ {
@@ -35,9 +23,9 @@ func regionsIncludingIndex(index int) [3]map[int]int {
 		regionInstance := regionsAlgs[i](index)
 		result[i] = regionClass[regionInstance]
 	}
-	return result
 }
 
+// fills region
 func fillIndexRegions(board [81]int, emptyRegions [3]map[int]int) {
 	for _, reg := range emptyRegions {
 		for k, _ := range reg {
@@ -71,8 +59,8 @@ func ValidateBoard(board [81]int) bool {
 	return true
 }
 
+// builds out entire region mapping for board
 func buildAll(board [81]int) (result [3]regionType) {
-	// builds out entire region mapping for board
 	for i := 0; i < len(regionsAlgs); i++ {
 		result[i] = buildFullRegion(board, regionsAlgs[i])
 	}
@@ -80,8 +68,8 @@ func buildAll(board [81]int) (result [3]regionType) {
 	return result
 }
 
+// initialize each map for region data structure
 func buildFullRegion(board [81]int, fn regionFunc) (result regionType) {
-	// initialize each map for region data structure
 	for regNum := 0; regNum < 9; regNum++ {
 		result[regNum] = make(map[int]int)
 	}
