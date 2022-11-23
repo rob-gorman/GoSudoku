@@ -1,5 +1,7 @@
 package board
 
+import "fmt"
+
 // type region map[int]int // singular row/col/box { index: value }
 type regionType [9]map[int]int
 type regionFunc func(int) int
@@ -18,8 +20,8 @@ var regionsAlgs = [3]regionFunc{rowAlg, colAlg, boxAlg}
 var regions = [3]regionType{rows, cols, boxes}
 
 // Initializes empty Sudoku structure constants
-// specifically `RegionsByIndexes` which is an array of the three
-// regions (row, column, box) associated with each space (0-80) on the board
+// specifically `RegionsByIndexes` which is an array mapping each space (0-80)
+// on the board to the index mappings of each region (row, column, box) it occupies
 func Init() {
 	initRegionsTemplate()
 }
@@ -32,6 +34,8 @@ func initRegionsTemplate() {
 	}
 }
 
+// returns an array of region mappings for a given index:
+// {index: {{indexes in same row}, {same col}, {same box}}
 func regionsForIndex(index int) (result [3]map[int]int) {
 	for i := 0; i < len(regions); i++ {
 		regionClass := regions[i]               // row, col, or box
@@ -41,19 +45,10 @@ func regionsForIndex(index int) (result [3]map[int]int) {
 	return result
 }
 
-// fills region
-// func fillIndexRegions(board [81]int, emptyRegions [3]map[int]int) {
-// 	for _, reg := range emptyRegions {
-// 		for k := range reg {
-// 			reg[k] = board[k]
-// 		}
-// 	}
-// }
-
-// initialize each map for region data structure
+// initializes mapping for each instance of a given region type
 func buildFullRegion(board [81]int, fn regionFunc) (result regionType) {
-	for regNum := 0; regNum < 9; regNum++ {
-		result[regNum] = make(map[int]int)
+	for regionNum := 0; regionNum < 9; regionNum++ {
+		result[regionNum] = make(map[int]int)
 	}
 
 	// generate map keys as appropriate indicies of board structure
@@ -65,6 +60,23 @@ func buildFullRegion(board [81]int, fn regionFunc) (result regionType) {
 	return result
 }
 
+// copies emptyRegionTemplate for mutation when initializing new GameBoard
+func emptyRegionsByIndex() RegionsByIndexes {
+	var template RegionsByIndexes
+
+	for i := range emptyRegionTemplate {
+		for region := range emptyRegionTemplate[i] {
+			template[i][region] = make(map[int]int)
+
+			for index, zeroVal := range emptyRegionTemplate[i][region] {
+				template[i][region][index] = zeroVal
+			}
+		}
+	}
+	return template
+}
+
+// functions for programmatically determining to what region an index belongs
 func rowAlg(index int) int {
 	return index / 9
 }
@@ -78,4 +90,12 @@ func boxAlg(index int) int {
 	col := colAlg(index)
 	box := (row/3)*3 + (col / 3)
 	return box
+}
+
+func prettyPrintIdxRegions(idx int, regions [3]map[int]int) string {
+	var printStr = fmt.Sprintf("%d", idx)
+	for _, region := range regions {
+		printStr += fmt.Sprintf("\t%#v\n", region)
+	}
+	return printStr
 }

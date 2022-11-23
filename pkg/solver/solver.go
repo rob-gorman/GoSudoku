@@ -5,7 +5,7 @@ import (
 )
 
 func Solve(input *[board.BoardSize]int) (solution [board.BoardSize]int, err error) {
-	gameBoard, err := board.New(input)
+	gameBoard, err := board.MakeBoard(input)
 	if err != nil {
 		// log
 		return solution, err

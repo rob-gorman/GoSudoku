@@ -2,23 +2,40 @@ package board
 
 import "fmt"
 
-const BoardSize int = 81
+const BoardSize = 81
 
 var ErrInvalidPuzzle = fmt.Errorf("invalid puzzle submission")
 
 type GameBoard struct {
-	Board   [BoardSize]int
+	Board   [81]int
 	Regions RegionsByIndexes
 }
 
-// validate inputs before
-func New(input *[BoardSize]int) (board *GameBoard, err error) {
-	for i, v := range input {
-		board.Board[i] = v
-		board.insertRegionsValue(i)
-	}
+// generates new GameBoard from flat input array
+// returns an error if board violates sudoku rules
+// however it assumes valid inputs (1-9) within bounds
+func MakeBoard(input *[81]int) (board *GameBoard, err error) {
+	board = gameBoardFromBoard(input)
 	err = board.validate()
 	return board, err
+}
+
+// intializes a new empty board
+func New() *GameBoard {
+	return &GameBoard{
+		Board:   [81]int{},
+		Regions: emptyRegionsByIndex(),
+	}
+}
+
+// parses a flat array of 81-space board into GameBoard struct
+func gameBoardFromBoard(input *[81]int) *GameBoard {
+	gb := New()
+	for i, v := range input {
+		gb.Board[i] = v
+		gb.insertRegionsValue(i)
+	}
+	return gb
 }
 
 func (b *GameBoard) LegalMoves(idx int) []int {
